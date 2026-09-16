@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local renders
+/output/
+
+# keep the safe environment template
+!.env.example
