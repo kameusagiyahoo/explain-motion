@@ -68,11 +68,24 @@ npm run render
 npm run render:sample
 ```
 
-The sample is written to `output/explain-motion.mp4`. Local CLI rendering is intentionally separate from the web API; production server rendering will be selected later from Remotion's supported deployment options.
+The sample is written to `output/explain-motion.mp4`. This CLI command remains the simplest one-off render path.
+
+### Export from the web UI
+
+Start the dedicated Node renderer in a second terminal:
+
+```bash
+npm run render:server
+```
+
+Then use **Export MP4** in the preview panel. The Next.js app only proxies authenticated job requests; Chromium and `@remotion/bundler` run in the separate renderer process. Jobs report progress, can be cancelled, and expose a private download through the Next.js proxy. Outputs are removed after 30 minutes by default.
+
+For a non-local renderer, set the same strong `RENDER_API_TOKEN` on the Next.js app and renderer, set `RENDER_SERVICE_URL` on Next.js, and bind the renderer with `RENDER_SERVER_HOST`. The service refuses a non-local bind without a token. `RENDER_MAX_PENDING` is the per-process queue limit; the current in-memory queue must be replaced by durable storage before horizontal scaling.
 
 ## Project structure
 
 ```text
+server/                     # dedicated authenticated render job service
 src/
 ├── app/                    # Next.js UI and POST /api/generate-plan
 ├── components/             # editor, Player, Storyboard, copied Remocn sources
@@ -93,6 +106,7 @@ src/
 - Storyboard seeking and immediate headline/body/points/steps/duration edits
 - Scene-level Mock/OpenAI regeneration with adjacent-scene context and identity preservation
 - Local H.264 MP4 render, tests, and CI
+- Web MP4 export through a dedicated Node job service with progress, cancellation, quotas, and expiring private downloads
 
 ## Roadmap
 

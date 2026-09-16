@@ -15,6 +15,11 @@ flowchart TD
   R --> C[Remocn + Remotion]
   C --> P[@remotion/player]
   C --> X[Local MP4 render]
+  E --> J[Next.js render-job proxy]
+  J --> S[Dedicated Node render service]
+  S --> Q[Bounded in-memory queue]
+  Q --> B[Remotion bundle + renderer]
+  B --> D[Expiring private MP4]
 ```
 
 ## Boundaries
@@ -32,7 +37,9 @@ The normalizer validates the raw plan, proportionally redistributes whole second
 
 ## Rendering strategy
 
-The browser uses `@remotion/player`. The MVP CLI uses `remotion render` on a local Node machine. A web Export button is intentionally omitted until a production renderer (dedicated Node, Lambda, or another current Remotion-supported option) is chosen with authentication, rate limits, storage, and cost controls.
+The browser uses `@remotion/player`. The CLI uses `remotion render`. Web export crosses a deliberate process boundary: Next.js proxies requests and keeps `RENDER_API_TOKEN` server-side, while a dedicated long-running Node process owns Chromium, `@remotion/bundler`, and `@remotion/renderer`.
+
+The service executes one render at a time, caps pending work, validates every VideoPlan, reports progress, supports cancellation through Remotion’s cancel signal, and removes private files after a configurable TTL. It binds to localhost by default and refuses a non-local bind without bearer authentication. The queue and metadata are in memory, so a durable queue/object store and deployment-level end-user authentication remain prerequisites for horizontal production scaling.
 
 ## Scene regeneration
 
