@@ -107,3 +107,17 @@ export type Audience = z.infer<typeof audienceSchema>;
 export type Scene = z.infer<typeof sceneSchema>;
 export type VideoPlan = z.infer<typeof videoPlanSchema>;
 export type GeneratePlanRequest = z.infer<typeof generatePlanRequestSchema>;
+
+export const regenerateSceneRequestSchema = z.object({
+  prompt: z.string().trim().min(3).max(4000),
+  audience: audienceSchema,
+  plan: videoPlanSchema,
+  sceneIndex: z.number().int().min(0),
+}).superRefine((value, context) => {
+  if (value.sceneIndex >= value.plan.scenes.length) {
+    context.addIssue({ code: "custom", path: ["sceneIndex"], message: "Scene index is outside the VideoPlan." });
+  }
+});
+
+export const regeneratedSceneOutputSchema = z.object({ scene: sceneSchema });
+export type RegenerateSceneRequest = z.infer<typeof regenerateSceneRequestSchema>;

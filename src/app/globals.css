@@ -201,3 +201,7 @@ textarea:focus, input:focus, select:focus { border-color: #38c7f2; box-shadow: 0
 .scene-editor { display: grid; grid-template-columns: 180px minmax(180px, 1fr) minmax(260px, 2fr); gap: 16px; align-items: end; }
 .scene-editor .section-heading { grid-column: 1 / -1; }
 @media (max-width: 950px) { .workspace { padding: 0 14px 32px; } .work-grid { grid-template-columns: 1fr; } .settings { grid-template-columns: 1fr; } .scene-editor { grid-template-columns: 1fr; } .preview-panel { padding: 12px; } }
+.editor-actions { display: flex; align-items: center; gap: 10px; }
+.regenerate-scene { border: 1px solid #3d5872; border-radius: 9px; background: #162638; color: #70dcff; padding: 8px 12px; font-size: 12px; font-weight: 800; }
+.regenerate-scene:hover:not(:disabled) { border-color: #45d3ff; background: #193247; }
+.regenerate-scene:disabled { opacity: .65; cursor: wait; }

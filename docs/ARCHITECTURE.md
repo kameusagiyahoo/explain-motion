@@ -33,3 +33,7 @@ The normalizer validates the raw plan, proportionally redistributes whole second
 ## Rendering strategy
 
 The browser uses `@remotion/player`. The MVP CLI uses `remotion render` on a local Node machine. A web Export button is intentionally omitted until a production renderer (dedicated Node, Lambda, or another current Remotion-supported option) is chosen with authentication, rate limits, storage, and cost controls.
+
+## Scene regeneration
+
+`POST /api/regenerate-scene` receives the validated VideoPlan, selected index, original request, and audience. The server sends only the selected scene plus its immediate neighbors to OpenAI. The returned structured scene must retain the original discriminant; the server then forcibly preserves `id` and `durationSeconds` and runs Zod validation again. Mock Mode follows the same response contract.

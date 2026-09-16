@@ -21,6 +21,7 @@ const distributeSeconds = (weights: number[], target: number, minimum = 2) => {
 
 export function normalizeVideoPlan(input: unknown): VideoPlan {
   const parsed = videoPlanSchema.parse(input);
+  if (durationOfScenes(parsed) === parsed.durationSeconds) return parsed;
   const durations = distributeSeconds(
     parsed.scenes.map((scene) => scene.durationSeconds),
     parsed.durationSeconds,

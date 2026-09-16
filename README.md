@@ -91,6 +91,7 @@ src/
 - Deterministic frame/fps animations and fade/slide transitions
 - Real Remocn copy-paste components in rendered scenes
 - Storyboard seeking and immediate headline/body/points/steps/duration edits
+- Scene-level Mock/OpenAI regeneration with adjacent-scene context and identity preservation
 - Local H.264 MP4 render, tests, and CI
 
 ## Roadmap
