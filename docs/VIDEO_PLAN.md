@@ -14,8 +14,7 @@ Logs ─┘
 ## Top-level contract
 
 ```ts
-type VideoPlan = {
-  version: 1;
+type BaseVideoPlan = {
   title: string;
   language: string;
   fps: 30;
@@ -23,6 +22,20 @@ type VideoPlan = {
   style: "simple" | "pop" | "tech";
   scenes: Scene[];
 };
+
+type VideoPlanV1 = BaseVideoPlan & {version: 1};
+
+type VideoPlanV2 = BaseVideoPlan & {
+  version: 2;
+  narration: {segments: NarrationSegment[]};
+  captions: {
+    enabled: boolean;
+    preset: "subtitles" | "highlight";
+    cues: CaptionCue[];
+  };
+};
+
+type VideoPlan = VideoPlanV1 | VideoPlanV2;
 ```
 
 `Scene` is a Zod discriminated union on `type`. Every scene contains `id`, `type`, and integer `durationSeconds`.
@@ -52,6 +65,8 @@ OpenAI Structured Output (JSON Schema generated from Zod)
 
 Mock mode enters the same normalizer and validator. Invalid JSON, unsupported scene types, missing fields, empty scenes, and invalid durations cannot reach the renderer.
 
+Version 2 adds one narration segment and at least one caption cue for every scene. Caption cues use absolute milliseconds and the official Remotion `Caption` fields (`text`, `startMs`, `endMs`, `timestampMs`, and `confidence`) plus `sceneId` and `pageBreakAfter`. After scene durations change, the normalizer deterministically retimes both narration and captions so every cue remains inside its scene.
+
 ## Versioning
 
-`version: 1` is mandatory. Breaking field semantics require a new version and migration rather than silently changing the renderer contract.
+Both `version: 1` and `version: 2` are accepted. Existing v1 plans render unchanged without captions; new Mock and OpenAI plans use v2. Future breaking field semantics require a new version and an explicit migration rather than silently changing the renderer contract.

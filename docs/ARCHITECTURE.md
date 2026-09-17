@@ -35,6 +35,8 @@ flowchart TD
 
 The normalizer validates the raw plan, proportionally redistributes whole seconds with a two-second minimum, and revalidates the result. Scene seconds always sum to `VideoPlan.durationSeconds`. Transition overlap is offset in the Remotion sequence lengths so the final composition remains exactly 30, 60, or 90 seconds.
 
+For VideoPlan v2, the same pass retimes narration segments and caption cues to the normalized scene boundaries. The timing calculation is deterministic and expressed in absolute milliseconds. VideoPlan v1 remains accepted and renders through the same scene pipeline without a caption overlay.
+
 ## Rendering strategy
 
 The browser uses `@remotion/player`. The CLI uses `remotion render`. Web export crosses a deliberate process boundary: Next.js proxies requests and keeps `RENDER_API_TOKEN` server-side, while a dedicated long-running Node process owns Chromium, `@remotion/bundler`, and `@remotion/renderer`.

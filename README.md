@@ -105,6 +105,7 @@ src/
 - Real Remocn copy-paste components in rendered scenes
 - Storyboard seeking and immediate headline/body/points/steps/duration edits
 - Scene-level Mock/OpenAI regeneration with adjacent-scene context and identity preservation
+- Backward-compatible VideoPlan v2 narration timing and deterministic `@remotion/captions` subtitles
 - Local H.264 MP4 render, tests, and CI
 - Web MP4 export through a dedicated Node job service with progress, cancellation, quotas, and expiring private downloads
 
