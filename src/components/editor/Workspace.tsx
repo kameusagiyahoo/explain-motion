@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import type { PlayerRef } from "@remotion/player";
 import { normalizeVideoPlan } from "@/lib/video-plan/normalize";
 import type { Audience, Scene, VideoPlan, VideoStyle } from "@/lib/video-plan/schema";
+import { isVideoPlanV2, narrationTextForScene, updateNarrationForScene } from "@/lib/video-plan/timing";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { Storyboard } from "@/components/storyboard/Storyboard";
 import { SceneEditor } from "./SceneEditor";
@@ -44,7 +45,8 @@ export function Workspace({ initialPlan }: { initialPlan: VideoPlan }) {
       const response = await fetch("/api/regenerate-scene", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ prompt, audience, plan, sceneIndex: selected }) });
       const body: { scene?: Scene; mode?: AiMode; error?: string } = await response.json();
       if (!response.ok || !body.scene) throw new Error(body.error || "Sceneを再生成できませんでした。");
-      const nextPlan = normalizeVideoPlan({ ...plan, scenes: plan.scenes.map((scene, index) => index === selected ? body.scene : scene) });
+      const replacedPlan = normalizeVideoPlan({ ...plan, scenes: plan.scenes.map((scene, index) => index === selected ? body.scene : scene) });
+      const nextPlan = isVideoPlanV2(replacedPlan) ? updateNarrationForScene(replacedPlan, body.scene.id, narrationTextForScene(body.scene)) : replacedPlan;
       setPlan(nextPlan); setMode(body.mode ?? "mock");
       const start = nextPlan.scenes.slice(0, selected).reduce((sum, scene) => sum + scene.durationSeconds, 0);
       playerRef.current?.seekTo(start * nextPlan.fps);
@@ -53,7 +55,11 @@ export function Workspace({ initialPlan }: { initialPlan: VideoPlan }) {
   }
 
   function updateScene(nextScene: Scene) {
-    try { setPlan(normalizeVideoPlan({ ...plan, scenes: plan.scenes.map((scene, index) => index === selected ? nextScene : scene) })); setError(null); }
+    try {
+      const replacedPlan = normalizeVideoPlan({ ...plan, scenes: plan.scenes.map((scene, index) => index === selected ? nextScene : scene) });
+      setPlan(isVideoPlanV2(replacedPlan) ? updateNarrationForScene(replacedPlan, nextScene.id, narrationTextForScene(nextScene)) : replacedPlan);
+      setError(null);
+    }
     catch { setError("Sceneの値を確認してください。空の項目や短すぎるdurationは保存できません。"); }
   }
 

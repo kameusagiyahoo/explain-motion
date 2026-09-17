@@ -2,7 +2,7 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { generateMockVideoPlan } from "./mockVideoPlan";
 import { normalizeVideoPlan } from "@/lib/video-plan/normalize";
-import { generatePlanRequestSchema, videoPlanSchema, type GeneratePlanRequest, type VideoPlan } from "@/lib/video-plan/schema";
+import { generatePlanRequestSchema, videoPlanSchema, videoPlanV2Schema, type GeneratePlanRequest, type VideoPlan } from "@/lib/video-plan/schema";
 
 export type PlanGenerationResult = { plan: VideoPlan; mode: "openai" | "mock" };
 
@@ -11,7 +11,9 @@ Return only the structured VideoPlan requested by the schema. Never return React
 Build a clear narrative for the requested audience and duration. Use concise on-screen text.
 Use at least four distinct scene types. Start with title and end with summary.
 Scene durations must be whole seconds and should sum to the requested total.
-Diagram edge endpoints must reference node ids in the same scene.`;
+Diagram edge endpoints must reference node ids in the same scene.
+Return VideoPlan version 2. Include exactly one concise narration segment and at least one caption cue for every scene.
+Caption and narration timings are absolute milliseconds, must fit inside the video, and caption cues use the Remotion Caption fields.`;
 
 export async function generateVideoPlan(rawInput: GeneratePlanRequest): Promise<PlanGenerationResult> {
   const input = generatePlanRequestSchema.parse(rawInput);
@@ -24,7 +26,7 @@ export async function generateVideoPlan(rawInput: GeneratePlanRequest): Promise<
     instructions: SYSTEM_INSTRUCTIONS,
     store: false,
     input: [{ role: "user", content: [{ type: "input_text", text: JSON.stringify({ topic: input.prompt, targetDurationSeconds: input.durationSeconds, audience: input.audience, visualStyle: input.style, language: input.language }) }] }],
-    text: { format: zodTextFormat(videoPlanSchema, "video_plan") },
+    text: { format: zodTextFormat(videoPlanV2Schema, "video_plan") },
   });
 
   if (!response.output_parsed) throw new Error("OpenAI returned no structured VideoPlan.");

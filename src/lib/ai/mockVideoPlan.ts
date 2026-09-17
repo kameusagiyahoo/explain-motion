@@ -1,11 +1,12 @@
 import { normalizeVideoPlan } from "@/lib/video-plan/normalize";
 import type { GeneratePlanRequest, VideoPlan } from "@/lib/video-plan/schema";
+import { upgradeVideoPlanToV2 } from "@/lib/video-plan/timing";
 
 export function generateMockVideoPlan(input: GeneratePlanRequest): VideoPlan {
   const isBlackHole = /ブラックホール|black\s*hole/i.test(input.prompt);
   const subject = isBlackHole ? "ブラックホール" : input.prompt.replace(/[。！？!?]+$/u, "").slice(0, 42);
 
-  return normalizeVideoPlan({
+  return normalizeVideoPlan(upgradeVideoPlanToV2({
     version: 1,
     title: `${subject}とは？`,
     language: input.language,
@@ -21,5 +22,5 @@ export function generateMockVideoPlan(input: GeneratePlanRequest): VideoPlan {
       { id: "scene-6", type: "number", durationSeconds: 3, value: isBlackHole ? 299792 : 3, suffix: isBlackHole ? " km/s" : "つ", label: isBlackHole ? "光の速度。それでも脱出できません" : "特徴・仕組み・意味で整理" },
       { id: "scene-7", type: "summary", durationSeconds: 5, headline: `${subject}の要点`, points: isBlackHole ? ["巨大な星から生まれる", "非常に強い重力を持つ", "光さえ脱出できない"] : ["全体像から始める", "要素と関係を分ける", "自分の言葉で説明する"] },
     ],
-  });
+  }));
 }

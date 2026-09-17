@@ -1,4 +1,5 @@
 import { videoPlanSchema, type VideoPlan } from "./schema";
+import { isVideoPlanV2, retimeVideoPlanV2 } from "./timing";
 
 const distributeSeconds = (weights: number[], target: number, minimum = 2) => {
   const remaining = target - minimum * weights.length;
@@ -21,19 +22,15 @@ const distributeSeconds = (weights: number[], target: number, minimum = 2) => {
 
 export function normalizeVideoPlan(input: unknown): VideoPlan {
   const parsed = videoPlanSchema.parse(input);
-  if (durationOfScenes(parsed) === parsed.durationSeconds) return parsed;
-  const durations = distributeSeconds(
-    parsed.scenes.map((scene) => scene.durationSeconds),
-    parsed.durationSeconds,
-  );
-
-  return videoPlanSchema.parse({
+  const durations = distributeSeconds(parsed.scenes.map((scene) => scene.durationSeconds), parsed.durationSeconds);
+  const normalized = durationOfScenes(parsed) === parsed.durationSeconds ? parsed : {
     ...parsed,
     scenes: parsed.scenes.map((scene, index) => ({
       ...scene,
       durationSeconds: durations[index],
     })),
-  });
+  };
+  return videoPlanSchema.parse(isVideoPlanV2(normalized) ? retimeVideoPlanV2(normalized) : normalized);
 }
 
 export const durationOfScenes = (plan: VideoPlan) =>
