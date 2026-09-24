@@ -81,9 +81,9 @@ Start the dedicated Node renderer in a second terminal:
 npm run render:server
 ```
 
-Then use **Export MP4** in the preview panel. The Next.js app only proxies authenticated job requests; Chromium and `@remotion/bundler` run in the separate renderer process. Jobs report progress, can be cancelled, and expose a private download through the Next.js proxy. Outputs are removed after 30 minutes by default.
+Then use **Export MP4** in the preview panel. The Next.js app only proxies authenticated job requests; Chromium and `@remotion/bundler` run in the separate renderer process. Jobs report progress, can be cancelled, and expose a private download through the Next.js proxy. Job metadata is atomically persisted beside the private MP4 files, interrupted jobs are requeued after a renderer restart, and outputs are removed after 30 minutes by default.
 
-For a non-local renderer, set the same strong `RENDER_API_TOKEN` on the Next.js app and renderer, set `RENDER_SERVICE_URL` on Next.js, and bind the renderer with `RENDER_SERVER_HOST`. The service refuses a non-local bind without a token. `RENDER_MAX_PENDING` is the per-process queue limit; the current in-memory queue must be replaced by durable storage before horizontal scaling.
+For a non-local renderer, set the same strong `RENDER_API_TOKEN` on the Next.js app and renderer, set `RENDER_SERVICE_URL` on Next.js, and bind the renderer with `RENDER_SERVER_HOST`. The service refuses a non-local bind without a token. `RENDER_MAX_PENDING` is the per-process queue limit. Set `RENDER_OUTPUT_DIR` to a mounted persistent volume in a single-node deployment. The filesystem store deliberately does not coordinate multiple renderer replicas; use an external queue and object storage before horizontal scaling.
 
 ## Project structure
 
@@ -112,7 +112,7 @@ src/
 - Bundled Japanese video font with measured text fitting and deterministic ellipsis for unusually long content
 - Pixel-based visual regression coverage for all seven Scene types across all three themes and maximum-length inputs
 - Local H.264 MP4 render, tests, and CI
-- Web MP4 export through a dedicated Node job service with progress, cancellation, quotas, and expiring private downloads
+- Web MP4 export through a dedicated Node job service with progress, cancellation, quotas, restart recovery, and expiring private downloads
 
 ## Roadmap
 

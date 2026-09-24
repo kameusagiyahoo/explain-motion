@@ -17,7 +17,7 @@ flowchart TD
   C --> X[Local MP4 render]
   E --> J[Next.js render-job proxy]
   J --> S[Dedicated Node render service]
-  S --> Q[Bounded in-memory queue]
+  S --> Q[Bounded persistent local queue]
   Q --> B[Remotion bundle + renderer]
   B --> D[Expiring private MP4]
 ```
@@ -41,7 +41,9 @@ For VideoPlan v2, the same pass retimes narration segments and caption cues to t
 
 The browser uses `@remotion/player`. The CLI uses `remotion render`. Web export crosses a deliberate process boundary: Next.js proxies requests and keeps `RENDER_API_TOKEN` server-side, while a dedicated long-running Node process owns Chromium, `@remotion/bundler`, and `@remotion/renderer`.
 
-The service executes one render at a time, caps pending work, validates every VideoPlan, reports progress, supports cancellation through Remotion’s cancel signal, and removes private files after a configurable TTL. It binds to localhost by default and refuses a non-local bind without bearer authentication. The queue and metadata are in memory, so a durable queue/object store and deployment-level end-user authentication remain prerequisites for horizontal production scaling.
+The service executes one render at a time, caps pending work, validates every VideoPlan, reports progress, supports cancellation through Remotion’s cancel signal, and removes private files after a configurable TTL. It binds to localhost by default and refuses a non-local bind without bearer authentication.
+
+Job metadata and its VideoPlan are schema-validated and atomically written to `render-jobs.json` beside the private outputs. On startup, interrupted queued/bundling/rendering jobs are reset and requeued, expired jobs are deleted, and completed jobs whose MP4 is missing are marked failed. `RENDER_OUTPUT_DIR` can point at a mounted persistent volume. This local store is intentionally single-node: an external transactional queue, object storage, and deployment-level end-user authorization remain prerequisites for horizontal production scaling.
 
 ## Typography and overflow
 
