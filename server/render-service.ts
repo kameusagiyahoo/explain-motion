@@ -18,7 +18,7 @@ const authToken = process.env.RENDER_API_TOKEN?.trim() ?? "";
 if (!["127.0.0.1", "localhost", "::1"].includes(host) && !authToken) {
   throw new Error("RENDER_API_TOKEN is required when the render service listens outside localhost.");
 }
-const outputDir = path.resolve(projectRoot, "output", "jobs");
+const outputDir = path.resolve(projectRoot, process.env.RENDER_OUTPUT_DIR?.trim() || path.join("output", "jobs"));
 let bundlePromise: Promise<string> | null = null;
 
 const runner: RenderRunner = async ({ plan, outputLocation, cancelSignal, onPhase, onProgress }) => {
@@ -60,8 +60,6 @@ const runner: RenderRunner = async ({ plan, outputLocation, cancelSignal, onPhas
 };
 
 const manager = new RenderJobManager(runner, outputDir, maxPending, retentionMinutes * 60_000);
-const cleanupTimer = setInterval(() => void manager.cleanupExpired(), 60_000);
-cleanupTimer.unref();
 
 const server = createServer(async (request, response) => {
   setSecurityHeaders(response);
@@ -112,13 +110,25 @@ const server = createServer(async (request, response) => {
   }
 });
 
-server.listen(port, host, () => {
-  console.log(`ExplainMotion render service listening on http://${host}:${port}`);
-  if (!authToken) console.warn("RENDER_API_TOKEN is empty. This is allowed only for local development.");
+void start().catch((error: unknown) => {
+  console.error("ExplainMotion render service failed to start.", error);
+  process.exitCode = 1;
 });
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
-  process.on(signal, () => server.close(() => process.exit(0)));
+  process.on(signal, () => server.close(() => void manager.close().finally(() => process.exit(0))));
+}
+
+async function start(): Promise<void> {
+  await manager.initialize();
+  const cleanupTimer = setInterval(() => {
+    void manager.cleanupExpired().catch((error: unknown) => console.error("Failed to clean expired render jobs.", error));
+  }, 60_000);
+  cleanupTimer.unref();
+  server.listen(port, host, () => {
+    console.log(`ExplainMotion render service listening on http://${host}:${port}`);
+    if (!authToken) console.warn("RENDER_API_TOKEN is empty. This is allowed only for local development.");
+  });
 }
 
 function isAuthorized(request: IncomingMessage): boolean {
