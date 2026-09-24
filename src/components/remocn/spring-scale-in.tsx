@@ -11,6 +11,8 @@ export interface SpringScaleInProps {
   fontWeight?: number;
   speed?: number;
   className?: string;
+  fontFamily?: string;
+  maxWidth?: number;
 }
 
 export function SpringScaleIn({
@@ -22,6 +24,8 @@ export function SpringScaleIn({
   fontWeight = 600,
   speed = 1,
   className,
+  fontFamily = "sans-serif",
+  maxWidth,
 }: SpringScaleInProps) {
   const frame = useCurrentFrame() * speed;
 
@@ -47,8 +51,9 @@ export function SpringScaleIn({
           fontWeight,
           color,
           letterSpacing: "-0.03em",
-          fontFamily:
-            "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily,
+          maxWidth,
+          textAlign: "center",
         }}
       >
         {words.map((word, i) => {
@@ -73,7 +78,7 @@ export function SpringScaleIn({
               key={i}
               style={{
                 display: "inline-block",
-                marginRight: "0.25em",
+                marginRight: i === words.length - 1 ? 0 : "0.25em",
                 transformOrigin: "50% 50%",
                 opacity,
                 scale: `${scale}`,

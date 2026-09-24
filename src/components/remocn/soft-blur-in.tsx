@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 
 export interface SoftBlurInProps {
@@ -10,6 +11,10 @@ export interface SoftBlurInProps {
   fontWeight?: number;
   speed?: number;
   className?: string;
+  fontFamily?: string;
+  maxWidth?: number;
+  lineHeight?: number;
+  textAlign?: CSSProperties["textAlign"];
 }
 
 export function SoftBlurIn({
@@ -20,6 +25,10 @@ export function SoftBlurIn({
   fontWeight = 600,
   speed = 1,
   className,
+  fontFamily = "sans-serif",
+  maxWidth,
+  lineHeight = 1.15,
+  textAlign = "center",
 }: SoftBlurInProps) {
   const frame = useCurrentFrame() * speed;
 
@@ -46,11 +55,14 @@ export function SoftBlurIn({
           fontWeight,
           color,
           letterSpacing: "-0.05em",
-          fontFamily:
-            "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily,
+          maxWidth,
+          lineHeight,
+          textAlign,
         }}
       >
         {chars.map((char, i) => {
+          if (char === "\n") return <br key={`break-${i}`} />;
           const local = frame - i * staggerFrames;
           const easing = Easing.bezier(0.22, 1, 0.36, 1);
           const opacity = interpolate(local, [0, charDurationFrames], [0, 1], {
