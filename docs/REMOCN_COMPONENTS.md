@@ -15,3 +15,5 @@ npx shadcn@latest add @remocn/soft-blur-in @remocn/spring-scale-in @remocn/stagg
 ```
 
 The current registry manifest was treated as authoritative because some older component documentation still references previous names such as `blur-reveal`.
+
+The copied `SoftBlurIn` and `SpringScaleIn` sources accept the active video theme's font family and explicit text bounds. This keeps the Remocn reveal animation while allowing the shared typography layer to prevent overflow deterministically.

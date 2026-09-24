@@ -43,6 +43,10 @@ The browser uses `@remotion/player`. The CLI uses `remotion render`. Web export 
 
 The service executes one render at a time, caps pending work, validates every VideoPlan, reports progress, supports cancellation through Remotion’s cancel signal, and removes private files after a configurable TTL. It binds to localhost by default and refuses a non-local bind without bearer authentication. The queue and metadata are in memory, so a durable queue/object store and deployment-level end-user authentication remain prerequisites for horizontal production scaling.
 
+## Typography and overflow
+
+Video rendering waits for the bundled Noto Sans JP variable font before measuring or drawing text. Shared text helpers use Remotion's layout utilities to fit content to explicit line and width constraints. Japanese text receives grapheme-level break opportunities for measurement, while authored spaces remain intact. If schema-valid text still cannot fit at the minimum font size, it is shortened deterministically with an ellipsis. `SceneFrame` clips as a final safety boundary, and maximum-length fixtures for all seven Scene types are covered by visual regression tests.
+
 ## Scene regeneration
 
 `POST /api/regenerate-scene` receives the validated VideoPlan, selected index, original request, and audience. The server sends only the selected scene plus its immediate neighbors to OpenAI. The returned structured scene must retain the original discriminant; the server then forcibly preserves `id` and `durationSeconds` and runs Zod validation again. Mock Mode follows the same response contract.

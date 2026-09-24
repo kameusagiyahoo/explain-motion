@@ -53,7 +53,7 @@ npm run test:visual
 npm run build
 ```
 
-Visual regression renders 22 deterministic PNG snapshots: every Scene type in Simple, Pop, and Tech, plus the v2 caption overlay. Failed comparisons are written to `output/visual-regression`. After reviewing an intentional visual change, update committed baselines with `npm run test:visual:update`.
+Visual regression renders 29 deterministic PNG snapshots: every Scene type in Simple, Pop, and Tech, the v2 caption overlay, and maximum-length overflow cases for all seven Scene types. Failed comparisons are written to `output/visual-regression`. After reviewing an intentional visual change, update committed baselines with `npm run test:visual:update`.
 
 ## Remotion preview
 
@@ -109,7 +109,8 @@ src/
 - Storyboard seeking and immediate headline/body/points/steps/duration edits
 - Scene-level Mock/OpenAI regeneration with adjacent-scene context and identity preservation
 - Backward-compatible VideoPlan v2 narration timing and deterministic `@remotion/captions` subtitles
-- Pixel-based visual regression coverage for all seven Scene types across all three themes
+- Bundled Japanese video font with measured text fitting and deterministic ellipsis for unusually long content
+- Pixel-based visual regression coverage for all seven Scene types across all three themes and maximum-length inputs
 - Local H.264 MP4 render, tests, and CI
 - Web MP4 export through a dedicated Node job service with progress, cancellation, quotas, and expiring private downloads
 
