@@ -65,6 +65,8 @@ OpenAI Structured Output (JSON Schema generated from Zod)
 
 Mock mode enters the same normalizer and validator. Invalid JSON, unsupported scene types, missing fields, empty scenes, and invalid durations cannot reach the renderer.
 
+Text and URL adapters first produce the same `AnalyzedContent` shape: a title, bounded plain text, excerpt, and citations. The planner consumes that semantic input and still returns only a VideoPlan. Citations are returned beside the plan as provenance for the workspace rather than being mixed into renderer instructions, preserving VideoPlan as the AI/video-engine contract.
+
 Version 2 adds one narration segment and at least one caption cue for every scene. Caption cues use absolute milliseconds and the official Remotion `Caption` fields (`text`, `startMs`, `endMs`, `timestampMs`, and `confidence`) plus `sceneId` and `pageBreakAfter`. After scene durations change, the normalizer deterministically retimes both narration and captions so every cue remains inside its scene.
 
 ## Versioning

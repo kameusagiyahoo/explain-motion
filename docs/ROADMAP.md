@@ -6,7 +6,7 @@ Complete in this MVP: text planning, schema validation, normalization, seven sce
 
 ## Phase 2 — URL → Video
 
-Fetch and safely extract selected web content, retain citations, and transform the semantic model into the same VideoPlan.
+Complete: safely fetch public HTML/text content, block private-network targets and unsafe redirects, retain source citations, and transform the extracted content into the same VideoPlan in OpenAI or Mock Mode.
 
 ## Phase 3 — PDF → Video
 

@@ -3,7 +3,11 @@
 ```mermaid
 flowchart TD
   U[User] --> E[Editor UI]
-  E --> A[POST /api/generate-plan]
+  E --> I{Input adapter}
+  I -->|Text| T[Text analyzer]
+  I -->|URL| W[Safe server-side fetch<br/>HTML/text extraction]
+  T --> A[AnalyzedContent]
+  W --> A
   A --> G{OPENAI_API_KEY?}
   G -->|yes| O[OpenAI Responses API\nStructured Output]
   G -->|no| M[MockVideoPlanGenerator]
@@ -25,7 +29,9 @@ flowchart TD
 ## Boundaries
 
 - The client owns form state, Player state, Storyboard selection, and safe plan edits.
-- The Route Handler owns secrets and chooses OpenAI or Mock mode.
+- The Route Handler owns secrets, server-side URL retrieval, and the OpenAI/Mock choice.
+- URL retrieval accepts only public HTTP(S) HTML/text resources, validates DNS again at connection time, revalidates redirects, and enforces timeout and byte limits.
+- Source citations remain provenance metadata beside the plan; arbitrary source markup never reaches React or Remotion.
 - The AI layer produces data only. It cannot generate, inject, or evaluate React.
 - `VideoPlan` is the stable contract between analysis/planning and visual rendering.
 - The renderer maps a discriminated `scene.type` through `sceneRegistry`; adding a Scene does not grow a central switch statement.

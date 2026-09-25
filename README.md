@@ -1,13 +1,13 @@
 # ExplainMotion
 
-ExplainMotion turns a short explanation request into a structured `VideoPlan`, then renders that plan as a deterministic Remotion video. The LLM is the director; Remotion is the renderer. The LLM never writes or evaluates React code.
+ExplainMotion turns text or a public web page into a structured `VideoPlan`, then renders that plan as a deterministic Remotion video. The LLM is the director; Remotion is the renderer. The LLM never writes or evaluates React code.
 
 > Screenshot placeholder — add `docs/images/workspace.png` after the first public release.
 
 ## Architecture
 
 ```text
-Text → Content Analyzer → Explanation Planner → VideoPlan → Scene Registry → Remocn + Remotion → Player / MP4
+Text / URL → Content Analyzer → Explanation Planner → VideoPlan → Scene Registry → Remocn + Remotion → Player / MP4
 ```
 
 `VideoPlan` is validated twice in AI mode: OpenAI Structured Outputs first, then the local Zod schema. A duration normalizer guarantees that scene durations sum to 30, 60, or 90 seconds. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and [docs/VIDEO_PLAN.md](docs/VIDEO_PLAN.md).
@@ -21,11 +21,11 @@ npm install
 npm run dev
 ```
 
-Open the printed localhost URL. Enter `ブラックホールとは？` and choose **Generate video plan**.
+Open the printed localhost URL. Enter `ブラックホールとは？` and choose **Generate video plan**, or switch to **URL** and enter a public HTML page.
 
 ## Mock Mode
 
-No API key is required. If `OPENAI_API_KEY` is missing or empty, the server uses `MockVideoPlanGenerator`. The complete flow remains available: Generate → validated VideoPlan → Player → Storyboard → editing.
+No API key is required. If `OPENAI_API_KEY` is missing or empty, the server uses `MockVideoPlanGenerator`. Text and URL analysis both remain available: Generate → validated VideoPlan → Player → Storyboard → editing.
 
 ## OpenAI API setup
 
@@ -93,6 +93,7 @@ src/
 ├── app/                    # Next.js UI and POST /api/generate-plan
 ├── components/             # editor, Player, Storyboard, copied Remocn sources
 ├── lib/ai/                 # OpenAI and Mock generators
+├── lib/content/            # Text/URL input adapters and source provenance
 ├── lib/video-plan/         # Zod contract, types, duration normalizer
 ├── remotion/               # CLI composition root
 └── video/                  # registry, themes, and seven scene renderers
@@ -100,7 +101,8 @@ src/
 
 ## Current MVP
 
-- Text input with 30/60/90 sec, audience, style, and Japanese-first language settings
+- Text and public URL input with 30/60/90 sec, audience, style, and Japanese-first language settings
+- Server-only HTML/text extraction with citation display, redirect checks, size limits, and private-network blocking
 - Mock AI mode and OpenAI Responses API mode
 - Seven discriminated scene types and registry-based renderer
 - Simple, Pop, and Tech video themes
@@ -116,7 +118,7 @@ src/
 
 ## Roadmap
 
-Phase 1 (this repository): Text → Explanation Video. Later phases add URL, PDF, CSV/data charts, GitHub analysis, voice, and a universal explanation engine. See [docs/ROADMAP.md](docs/ROADMAP.md).
+Phases 1–2 are implemented: Text / URL → Explanation Video. Later phases add PDF, CSV/data charts, GitHub analysis, voice, and a universal explanation engine. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Official references
 
